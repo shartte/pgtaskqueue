@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
-class BackgroundService(private val threadName: String,
+class BackgroundService(threadName: String,
                         private val worker: CancelableWork,
                         private val backOffFactory: () -> BackOffStrategy,
                         private val waitAfterSuccessInMs: Long = 0) : AutoCloseable {

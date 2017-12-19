@@ -1,6 +1,8 @@
 package de.hartte.workqueue.tasks
 
 import de.hartte.workqueue.events.TaskEventSink
+import org.slf4j.LoggerFactory
+import kotlin.system.measureTimeMillis
 
 /**
  * Handles execution of tasks retrieved from the queue.
@@ -8,6 +10,8 @@ import de.hartte.workqueue.events.TaskEventSink
 class TaskHandler(private val taskTypeRegistry: TaskTypeRegistry,
                   private val taskDataConverter: TaskDataConverter,
                   private val taskEventSinkFactory: (Long) -> TaskEventSink) {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     fun workOnTask(taskId: Long, taskTypeId: String, taskDataJson: String) {
 
@@ -18,11 +22,23 @@ class TaskHandler(private val taskTypeRegistry: TaskTypeRegistry,
 
     private fun <T> workOnTask(taskId: Long, taskType: TaskType<T>, taskDataJson: String) {
 
-        val taskData = taskDataConverter.fromJson(taskDataJson, taskType.dataType)
+        logger.debug("Working on {} task with id {}", taskType.typeId, taskId)
 
-        val eventSink = taskEventSinkFactory(taskId)
+        val elapsed = measureTimeMillis {
 
-        taskType.handler(taskData, eventSink)
+            val taskData = taskDataConverter.fromJson(taskDataJson, taskType.dataType)
+
+            val eventSink = taskEventSinkFactory(taskId)
+
+            eventSink.workStarted()
+
+            taskType.handler(taskData, eventSink)
+
+            eventSink.workSucceeded()
+
+        }
+
+        logger.debug("Finished working on task {} after {} ms", taskId, elapsed)
 
     }
 

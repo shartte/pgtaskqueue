@@ -8,7 +8,7 @@ dependencies {
     compile(project(":core"))
 
     compile("com.fasterxml.jackson.core", "jackson-databind", "2.9.3")
-    compile("org.slf4j", "slf4j-simple", "1.7.25")
+    compile("ch.qos.logback", "logback-classic", "1.2.3")
 
     testCompile("org.testng", "testng", "6.13.1")
 }

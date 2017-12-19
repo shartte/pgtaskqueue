@@ -1,8 +1,8 @@
 package de.hartte.workqueue.examples
 
+import de.hartte.workqueue.TaskDbConfiguration
 import de.hartte.workqueue.TaskQueue
-import de.hartte.workqueue.TaskQueueConfiguration
-import de.hartte.workqueue.events.TaskEventSink
+import de.hartte.workqueue.events.JdbcEventSinkFactory
 import de.hartte.workqueue.tasks.JacksonDataConverter
 import de.hartte.workqueue.tasks.TaskHandler
 import de.hartte.workqueue.tasks.TaskTypeRegistry
@@ -23,7 +23,7 @@ fun main(args: Array<String>) {
         password = settings.password
     }
 
-    val config = TaskQueueConfiguration()
+    val config = TaskDbConfiguration()
 
     val typeRegistry = TaskTypeRegistry()
 
@@ -31,60 +31,12 @@ fun main(args: Array<String>) {
 
     }
 
-    val eventSinkFactory = { taskId: Long ->
-        object : TaskEventSink {
-            override fun workStarted() {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-            }
-
-            override fun info(message: String) {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-            }
-
-            override fun warning(message: String) {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-            }
-
-            override fun warning(message: String, e: Throwable) {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-            }
-
-            override fun error(message: String) {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-            }
-
-            override fun error(message: String, e: Throwable) {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-            }
-
-            override fun progressStage(stage: String) {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-            }
-
-            override fun progress(completedSteps: Int, totalSteps: Int) {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-            }
-
-            override fun workSucceeded() {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-            }
-
-            override fun workFailed(message: String) {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-            }
-
-            override fun workFailed(message: String, e: Throwable) {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-            }
-        }
-    }
-
-    val taskHandler = TaskHandler(typeRegistry, JacksonDataConverter(), eventSinkFactory)
+    val eventSinkFactory = JdbcEventSinkFactory(dataSource, config)
+    val taskHandler = TaskHandler(typeRegistry, JacksonDataConverter(), eventSinkFactory::createEventSink)
 
     val queue = TaskQueue(
             config,
             JacksonDataConverter(),
-            typeRegistry,
             taskHandler,
             dataSource
     )

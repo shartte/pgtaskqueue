@@ -30,7 +30,7 @@ class TaskTypeRegistry {
         val serviceLoader = ServiceLoader.load(TaskTypeRegistrator::class.java)
 
         for (registrator in serviceLoader) {
-            logger.debug("Registering types from $registrator")
+            logger.debug("Registering task types from ${registrator.javaClass.name}")
             registrator.registerTaskTypes(this)
         }
 
